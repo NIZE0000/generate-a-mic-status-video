@@ -1,3 +1,15 @@
 # generate-a-mic-status-video
 
-all of this used python 
+generate a video from detection audio.
+base on jumpcutter by kivancyuksel
+all of this code used python.
+
+## Installation
+
+first install all package requirements
+```
+pip install -r requirements.txt
+```
+
+## All command
+
