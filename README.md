@@ -26,3 +26,7 @@ pip install -r requirements.txt
 ```
 py __main__.py -i input_path -o output_path -d_ default_img_path -a_ active_img_path
 ```
+
+```
+py __main__.py -i input_path -o output_path -d_ default_img_path -a_ active_img_path -x 5 -w_ 1920 -h_ 1080 -fps 60
+```
