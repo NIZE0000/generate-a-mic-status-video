@@ -17,16 +17,19 @@ pip install -r requirements.txt
 `--active_img`, `-a_`: Path to the active image file.  
   
 *Addition  
-`--silence-part-speed`, `-x`: If this parameter is given, instead of cutting the silent parts out, the script will speed them up "x" times.  
-`--width`, `-w_`:  
-`--heigth`, `-h_`:  
+`--silence-part-speed`, `-x`: If this parameter is given the silent part will speed up "x" times.  
+`--width`, `-w_`:  If this parameter is given the width of video will change. *Default width reference frome default_img   
+`--heigth`, `-h_`:  If this parameter is given the heigth of video will change. *Default heigth reference frome default_img  
+`--fps` :   
+`--bitrate` :   
+`--codec`: Codec to use for image encoding.  
 
 ## Examples
 *The simplest way you can run the program
 ```
 py __main__.py -i input_path -o output_path -d_ default_img_path -a_ active_img_path
 ```
-
+  
 ```
-py __main__.py -i input_path -o output_path -d_ default_img_path -a_ active_img_path -x 5 -w_ 1920 -h_ 1080 -fps 60
+py __main__.py -i input_path -o output_path -d_ default_img_path -a_ active_img_path -x 5 -w_ 1920 -h_ 1080 --fps 60
 ```
