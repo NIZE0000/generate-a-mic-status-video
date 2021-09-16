@@ -10,17 +10,18 @@ pip install -r requirements.txt
 ```
 
 ## All command
-**Required  
+*Required  
 `--input`, `-i`: Path to the video or audio that you want to use for generate a video.  
 `--output`, `-o`: Path to where you want to save the output video.  
 `--default_img`, `-d_`: Path to the inactive image file.  
 `--active_img`, `-a_`: Path to the active image file.  
   
-*Advance  
+*Addition  
 `--silence-part-speed`, `-x`: If this parameter is given, instead of cutting the silent parts out, the script will speed them up "x" times.  
+`--width`, `-w_`:  
+`--heigth`, `-h_`:  
 
-
-## Examples of running the program
+## Examples
 *The simplest way you can run the program
 ```
 py __main__.py -i input_path -o output_path -d_ default_img_path -a_ active_img_path
