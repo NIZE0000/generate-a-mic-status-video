@@ -14,36 +14,35 @@ class Clip:
         self.img = {
             "default": default_img,
             "active": active_img,
-            "width": width if width!=None else img_w,
-            "height": height if width!=None else img_h
+            "width": width if width != None else img_w,
+            "height": height if width != None else img_h
         }
-        Image.new('RGB', (self.img["width"], self.img["height"]), color = (0, 0, 0)).save('BG.png')
+        Image.new('RGB', (self.img["width"], self.img["height"]), color=(0, 0, 0)).save('BG.png')
         self.clip = (ImageClip('BG.png').set_duration(self.clip.duration)
-                        .set_audio(AudioFileClip(clip_path))
-                        .set_fps(VideoFileClip(clip_path).fps))
+                     .set_audio(AudioFileClip(clip_path))
+                     .set_fps(VideoFileClip(clip_path).fps))
         os.remove('BG.png')
         self.default_clip = (ImageClip(self.img["default"])
-                             .set_duration(self.clip.duration)
-                             .resize(width=self.img["width"], height=self.img["height"])
                              .set_position(("center", "center"))
+                             .resize(width=self.img["width"], height=self.img["height"])
                              )
         self.audio = Audio(self.clip.audio)
-        self.active_clip = ImageClip(self.img["active"])
+        self.active_clip = (ImageClip(self.img["active"])
+                            .resize(width=self.img["width"], height=self.img["height"])
+                            .set_position(("center", "center")))
 
         self.min_loud_part_duration = min_loud_part_duration
         self.silence_part_speed = silence_part_speed
-
-
 
     def get_duration(self):
         return self.clip.duration
 
     def jumpcut(
-        self,
-        magnitude_threshold_ratio,
-        duration_threshold_in_seconds,
-        failure_tolerance_ratio,
-        space_on_edges,
+            self,
+            magnitude_threshold_ratio,
+            duration_threshold_in_seconds,
+            failure_tolerance_ratio,
+            space_on_edges,
     ):
 
         intervals_to_cut = self.audio.get_intervals_to_cut(
@@ -62,16 +61,14 @@ class Clip:
         for start, stop in tqdm(intervals_to_cut, desc="Cutting silent intervals"):
             clip_before = (self.clip.subclip(previous_stop, start))
             clip_before = (CompositeVideoClip([clip_before,
-                          (self.active_clip.set_duration(clip_before.duration)
-                           .resize(width=self.img["width"], height=self.img["height"])
-                           .set_position(("center","center")))]))
+                                               (self.active_clip.set_duration(clip_before.duration))]))
 
             if clip_before.duration > self.min_loud_part_duration:
                 jumpcutted_clips.append(clip_before)
 
             if self.silence_part_speed is not None:
-                silence_clip = (CompositeVideoClip([self.clip, self.default_clip])
-                                .subclip(start, stop))
+                silence_clip = self.clip.subclip(start, stop)
+                silence_clip = CompositeVideoClip([silence_clip, self.default_clip.set_duration(silence_clip.duration)])
                 silence_clip = speedx(
                     silence_clip, self.silence_part_speed
                 ).without_audio()
@@ -80,6 +77,7 @@ class Clip:
             previous_stop = stop
 
         last_clip = self.clip.subclip(stop, self.clip.duration)
+        last_clip = (CompositeVideoClip([last_clip, self.active_clip.set_duration(last_clip.duration)]))
         jumpcutted_clips.append(last_clip)
         return jumpcutted_clips
 
