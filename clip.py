@@ -19,7 +19,7 @@ class Clip:
         Image.new('RGB', (self.img["width"], self.img["height"]), color = (0, 0, 0)).save('TEMP_BG.png')
         self.clip = (ImageClip('TEMP_BG.png').set_duration(AudioFileClip(clip_path).duration)
                         .set_audio(AudioFileClip(clip_path))
-                        .set_fps(VideoFileClip(clip_path).fps if VideoFileClip(clip_path).fps != None else 30)
+                        .set_fps(VideoFileClip(clip_path) if VideoFileClip(clip_path) > 24 else 24)
                      )
         os.remove('TEMP_BG.png')
         self.default_clip = (ImageClip(self.img["default"])
@@ -95,7 +95,7 @@ class Clip:
 class Audio:
     def __init__(self, audio):
         self.audio = audio
-        self.fps = audio.fps
+        self.fps = audio.fps if audio.fps > 24  else 1
 
         self.signal = self.audio.to_soundarray()
         if len(self.signal.shape) == 1:
