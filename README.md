@@ -19,7 +19,7 @@ pip install -r requirements.txt
 *Addition  
 `--width`, `-w_`:  If this parameter is given the width of video will change. *Default width reference frome default_img   
 `--heigth`, `-h_`:  If this parameter is given the heigth of video will change. *Default heigth reference frome default_img  
-`--silence-part-speed`, `-x`: If this parameter is given the silent part will speed up "x" times.  
+`--silence-part-speed`, `-x`: If this parameter is given the silent part will speed up "x" times. set None to skip.   
 `--fps` : Desired fps of the output video.  
 `--bitrate` : Desired bitrate of the output video.   
 `--codec`: Codec to use for image encoding.  
