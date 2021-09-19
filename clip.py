@@ -17,21 +17,18 @@ class Clip:
             "width": width if width!=None else img_w,
             "height": height if width!=None else img_h
         }
-        Image.new('RGB', (self.img["width"], self.img["height"]), color = (0, 0, 0)).save('TEMP_BG.png')
-        self.clip = (ImageClip('TEMP_BG.png').set_duration(self.clip.duration)
+        Image.new('RGB', (self.img["width"], self.img["height"]), color = (0, 0, 0)).save('BG.png')
+        self.clip = (ImageClip('BG.png').set_duration(self.clip.duration)
                         .set_audio(AudioFileClip(clip_path))
-                        .set_fps(VideoFileClip(clip_path).fps)
-                     )
-        os.remove('TEMP_BG.png')
+                        .set_fps(VideoFileClip(clip_path).fps))
+        os.remove('BG.png')
         self.default_clip = (ImageClip(self.img["default"])
+                             .set_duration(self.clip.duration)
+                             .resize(width=self.img["width"], height=self.img["height"])
                              .set_position(("center", "center"))
-                             .resize(width=self.clip.w, height=self.clip.h)
                              )
         self.audio = Audio(self.clip.audio)
-        self.active_clip = (ImageClip(self.img["active"])
-                            .set_position(("center","center"))
-                            .resize(width=self.clip.w, height=self.clip.h)
-                            )
+        self.active_clip = ImageClip(self.img["active"])
 
         self.min_loud_part_duration = min_loud_part_duration
         self.silence_part_speed = silence_part_speed
@@ -48,7 +45,6 @@ class Clip:
         failure_tolerance_ratio,
         space_on_edges,
     ):
-        self.space_on_edges = space_on_edges
 
         intervals_to_cut = self.audio.get_intervals_to_cut(
             magnitude_threshold_ratio,
@@ -60,24 +56,22 @@ class Clip:
         outputs = concatenate_videoclips(jumpcutted_clips)
         return outputs
 
-    def jumpcut_silent_parts(self, intervals_to_cut, ):
+    def jumpcut_silent_parts(self, intervals_to_cut):
         jumpcutted_clips = []
         previous_stop = 0
         for start, stop in tqdm(intervals_to_cut, desc="Cutting silent intervals"):
             clip_before = (self.clip.subclip(previous_stop, start))
-            active_clip =(self.active_clip
-                            .set_start(self.space_on_edges)
-                            .set_end(clip_before.duration-self.space_on_edges))
-            default_clip = (self.default_clip
-                            .set_duration(clip_before.duration))
-            clip_before = (CompositeVideoClip([clip_before, default_clip, active_clip]))
+            clip_before = (CompositeVideoClip([clip_before,
+                          (self.active_clip.set_duration(clip_before.duration)
+                           .resize(width=self.img["width"], height=self.img["height"])
+                           .set_position(("center","center")))]))
 
             if clip_before.duration > self.min_loud_part_duration:
                 jumpcutted_clips.append(clip_before)
 
             if self.silence_part_speed is not None:
-                silence_clip = self.clip.subclip(start, stop)
-                silence_clip = CompositeVideoClip([silence_clip, self.default_clip.set_duration(silence_clip.duration)])
+                silence_clip = (CompositeVideoClip([self.clip, self.default_clip])
+                                .subclip(start, stop))
                 silence_clip = speedx(
                     silence_clip, self.silence_part_speed
                 ).without_audio()
@@ -86,9 +80,6 @@ class Clip:
             previous_stop = stop
 
         last_clip = self.clip.subclip(stop, self.clip.duration)
-        active_clip = self.active_clip.set_duration(last_clip.duration-self.space_on_edges)
-        default_clip = (self.default_clip.set_duration(last_clip.duration))
-        last_clip = (CompositeVideoClip([last_clip, default_clip, active_clip]))
         jumpcutted_clips.append(last_clip)
         return jumpcutted_clips
 
