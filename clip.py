@@ -8,7 +8,6 @@ import os
 class Clip:
     def __init__(self, clip_path, min_loud_part_duration, silence_part_speed,
                  default_img, active_img, width, height):
-        self.clip = VideoFileClip(clip_path)
         image = Image.open(default_img)
         img_w, img_h = image.size
         self.img = {
@@ -18,9 +17,9 @@ class Clip:
             "height": height if width!=None else img_h
         }
         Image.new('RGB', (self.img["width"], self.img["height"]), color = (0, 0, 0)).save('TEMP_BG.png')
-        self.clip = (ImageClip('TEMP_BG.png').set_duration(self.clip.duration)
+        self.clip = (ImageClip('TEMP_BG.png').set_duration(AudioFileClip(clip_path).duration)
                         .set_audio(AudioFileClip(clip_path))
-                        .set_fps(VideoFileClip(clip_path).fps)
+                        .set_fps(VideoFileClip(clip_path).fps if VideoFileClip(clip_path).fps != None else 30)
                      )
         os.remove('TEMP_BG.png')
         self.default_clip = (ImageClip(self.img["default"])
