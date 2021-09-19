@@ -1,7 +1,5 @@
 import argparse
-
 from clip import Clip
-
 from pathlib import Path
 
 def main():
